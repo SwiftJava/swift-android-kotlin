@@ -1,7 +1,7 @@
 ## Kotlin example for the SwiftAndroid toolchain.
 
-Requires a build of the latest Android toolchain downloadable [here](http://johnholdsworth.com/android_toolchain.tgz) Once you've extracted the toolchain, run `swift-install/setup.sh` to get started. The phone must be api 21 aka Android v5+ aka Lollipop or better (I used an LG K4.) Make sure the version of swiftc in the toolchain appears first in your path and there is a swift-build from a swift.org toolchain in the path and finally, that the ANDROID_NDK_HOME` environment variable is set to the path to the NDK.
-
+Requires a build of the latest Android toolchain downloadable [here](http://johnholdsworth.com/android_toolchain.tgz). Once you've extracted the toolchain, run `swift-install/setup.sh` to get started. Once you've extracted this example you may need to edit local.properties to point to your Android SDK and then you should be able to run `./gradlew installDebug` or build the project in Android Studio. Make sure the that the `ANDROID_HOME` environment variable is set to the path to the SDK.
+The phone must be api 21 aka Android v5+ aka Lollipop or better (I used an LG K4.) 
 To create a new application, decide on a pair of interfaces to connect to and from your Swift
 code and place them in a [Java Source](https://github.com/SwiftJava/swift-android-samples/blob/master/swifthello/src/main/java/com/jh/SwiftHello.java).
 Use the command `./genswift.sh` in the [SwiftJava Project](https://github.com/SwiftJava/SwiftJava)
