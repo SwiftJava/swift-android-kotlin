@@ -1,7 +1,10 @@
-## Kotlin example for the SwiftAndroid toolchain.
+# Kotlin example for the Android Swift toolchain.
 
-Requires a build of the latest Android toolchain downloadable [here](http://johnholdsworth.com/android_toolchain.tgz). Once you've extracted the toolchain, run `swift-install/setup.sh` to get started. Once you've extracted this example you may need to edit local.properties to point to your Android SDK and then you should be able to run `./gradlew installDebug` or build the project in Android Studio. Make sure the that the `ANDROID_HOME` environment variable is set to the path to the SDK.
+![](http://johnholdsworth.com/kotlin.png)
+
+Requires a build of the latest Android toolchain downloadable [here](http://johnholdsworth.com/android_toolchain.tgz). Once you've extracted the toolchain, run `swift-install/setup.sh` to get started. You then run `./gradlew installDebug` or build the project in Android Studio. Make sure the that the `ANDROID_HOME` environment variable is set to the path to an [Android SDK](https://developer.android.com/studio/index.html).
 The phone must be api 21 aka Android v5+ aka Lollipop or better (I used an LG K4.) 
+
 To create a new application, decide on a pair of interfaces to connect to and from your Swift
 code and place them in a [Java Source](https://github.com/SwiftJava/swift-android-samples/blob/master/swifthello/src/main/java/com/jh/SwiftHello.java).
 Use the command `./genswift.sh` in the [SwiftJava Project](https://github.com/SwiftJava/SwiftJava)
@@ -18,15 +21,14 @@ Context.getCacheDir().getPath() from the java side. In addition, to be able to u
 need to add a [CARoot info file](http://curl.haxx.se/docs/caextract.html) to the application's
 raw resources and copy it to this cache directory to be picked up by Foundation as follows:
 
-    URLSession.sslCertificateAuthorityFile = URL(fileURLWithPath: cacheDir! + "/cacert.pem")
+    setenv("URLSessionCAInfo", cacheDir! + "/cacert.pem", 1)
+    setenv("TMPDIR", cacheDir!, 1)
 
 If you don't want peer validation you have the following option (not recommended at all)
 
-    URLSession.verifyPeerSSLCertificate = false
-
-##
-
-Simple demo of Swift code accessed over JNI.
+    setenv("URLSessionCAInfo", “INSECURE_SSL_NO_VERIFY”, 1)
+    
+## Simple demo of Swift code accessed over JNI.
 
 To build, setup the Gradle plugin, then run `./gradlew installDebug`
 

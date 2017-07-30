@@ -11,7 +11,7 @@ class SwiftApp : Application() {
 
     companion object {
 
-        var sharedApplication: Application? = null
+        lateinit var sharedApplication: Application
             private set
     }
 }

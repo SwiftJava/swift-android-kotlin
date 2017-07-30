@@ -9,8 +9,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
 
-import com.jh.SwiftHello.Listener
-import com.jh.SwiftHello.Responder
+import com.jh.SwiftHelloBinding.Listener
+import com.jh.SwiftHelloBinding.Responder
 import com.jh.SwiftHelloTest.TestListener
 import com.jh.SwiftHelloTest.TestResponderImpl
 
@@ -35,10 +35,10 @@ class MainActivity : AppCompatActivity(), Responder {
         }
         loadNativeDependencies()
         listener = bind(this)
-        val context = SwiftApp.sharedApplication?.getApplicationContext()
+        val context = SwiftApp.sharedApplication.getApplicationContext()
         val cacheDir = context?.getCacheDir()?.getPath()
         val pemfile = cacheDir + "/cacert.pem"
-        val pemStream = SwiftApp.sharedApplication?.getResources()?.openRawResource(R.raw.cacert)
+        val pemStream = SwiftApp.sharedApplication.getResources()?.openRawResource(R.raw.cacert)
         copyResource(pemStream, pemfile)
         listener.setCacheDir(cacheDir)
         listener.processText("World")
@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity(), Responder {
             val out = FileOutputStream(to)
             `in`?.copyTo(out)
             `in`?.close()
-            out?.close()
+            out.close()
         } catch (e: IOException) {
             e.printStackTrace()
             System.out.println("" + e)

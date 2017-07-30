@@ -257,7 +257,7 @@ public class SwiftTestResponder {
 
             let response = responder.StringMethod( reference )
             if response != reference {
-                NSLog("String: \(response) != \(reference)")
+                NSLog("String: \(response ?? "nil") != \(reference)")
             }
             let responseArray = responder.StringArrayMethod( referenceArray )!
             if responseArray != referenceArray {
