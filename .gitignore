@@ -5,5 +5,16 @@
 /.idea/libraries
 .DS_Store
 /build
+jniLibs
 /captures
 .externalNativeBuild
+*.pins
+.build
+build
+jniLibs
+Packages
+*.class
+*.so
+*.apk
+*.pins
+vcs.xml

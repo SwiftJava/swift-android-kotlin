@@ -6,16 +6,16 @@ import java_swift
 /// JAVA_HOME: /Library/Java/JavaVirtualMachines/jdk1.8.0_101.jdk/Contents/Home ///
 /// Sun Aug 06 01:21:22 BST 2017 ///
 
-/// interface com.johnholdsworth.bindings.SwiftHelloTest ///
+/// interface com.johnholdsworth.bindings.SwiftHelloTypes ///
 
-public protocol SwiftHelloTest: JavaProtocol {
+public protocol SwiftHelloTypes: JavaProtocol {
 
 }
 
 
-open class SwiftHelloTestForward: JNIObjectForward, SwiftHelloTest {
+open class SwiftHelloTypesForward: JNIObjectForward, SwiftHelloTypes {
 
-    private static var SwiftHelloTestJNIClass: jclass?
+    private static var SwiftHelloTypesJNIClass: jclass?
 
 }
 

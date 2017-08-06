@@ -1,3 +1,4 @@
+
 package com.example.user.myapplication
 
 import android.os.Bundle
@@ -9,10 +10,15 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
 
-import com.jh.SwiftHelloBinding.Listener
-import com.jh.SwiftHelloBinding.Responder
-import com.jh.SwiftHelloTest.TestListener
-import com.jh.SwiftHelloTest.TestResponderImpl
+import com.johnholdsworth.bindings.SwiftHelloBinding.Listener
+import com.johnholdsworth.bindings.SwiftHelloBinding.Responder
+
+import com.johnholdsworth.bindings.SwiftHelloTypes.TextListener
+import com.johnholdsworth.bindings.SwiftHelloTypes.ListenerMap
+import com.johnholdsworth.bindings.SwiftHelloTypes.ListenerMapList
+
+import com.johnholdsworth.bindings.SwiftHelloTest.TestListener
+import com.johnholdsworth.bindings.SwiftHelloTest.SwiftTestListener
 
 import java.io.*
 
@@ -41,6 +47,10 @@ class MainActivity : AppCompatActivity(), Responder {
         val pemStream = SwiftApp.sharedApplication.getResources()?.openRawResource(R.raw.cacert)
         copyResource(pemStream, pemfile)
         listener.setCacheDir(cacheDir)
+        val tester = listener.testResponder(2)
+        for (i in 0..99) {
+            SwiftTestListener().respond(tester)
+        }
         listener.processText("World")
     }
 
@@ -89,13 +99,37 @@ class MainActivity : AppCompatActivity(), Responder {
         }
     }
 
+    override fun processedTextListener(text: TextListener) {
+        processedText( text.getText() );
+    }
+
+    override fun processedTextListenerArray(text: Array<out TextListener>?) {
+        processedText( text!![0].getText() );
+    }
+
+    override fun processedTextListener2dArray(text: Array<out Array<TextListener>>?) {
+        processedText( text!![0][0].getText() );
+    }
+
+    override fun processMap(map: ListenerMap?) {
+        listener.processedMap( map )
+    }
+
+    override fun processMapList(map: ListenerMapList?) {
+        listener.processedMapList( map )
+    }
+
     override fun debug(msg: String): Array<String> {
         System.out.println("Swift: " + msg)
         return arrayOf("!" + msg, msg + "!")
     }
 
-    override fun testResponder(): TestListener {
-        return TestResponderImpl()
+    override fun testResponder(loopback: Int): TestListener {
+        val test = SwiftTestListener()
+        if ( loopback > 0 ) {
+            test.setLoopback( listener.testResponder(loopback - 1 ) )
+        }
+        return test
     }
 
     companion object {
