@@ -14,7 +14,8 @@ public func bind_samples( __env: UnsafeMutablePointer<JNIEnv?>, __this: jobject?
     responder = SwiftHelloBinding_ResponderForward( javaObject: __self )
 
     // This Swift instance receives native calls from Java
-    return SwiftListenerImpl().withJavaObject { JNI.api.NewLocalRef( JNI.env, $0 ) }
+    var locals = [jobject]()
+    return SwiftListenerImpl().localJavaObject( &locals )
 }
 
 // kotlin's call to bind the Java and Swift sections of app
@@ -25,7 +26,8 @@ public func bind_kotlin( __env: UnsafeMutablePointer<JNIEnv?>, __this: jobject?,
     responder = SwiftHelloBinding_ResponderForward( javaObject: __self )
 
     // This Swift instance receives native calls from Java
-    return SwiftListenerImpl().withJavaObject { JNI.api.NewLocalRef( JNI.env, $0 ) }
+    var locals = [jobject]()
+    return SwiftListenerImpl().localJavaObject( &locals )
 }
 
 struct MyText: SwiftHelloTypes_TextListener {
@@ -35,7 +37,7 @@ struct MyText: SwiftHelloTypes_TextListener {
     }
     func getText() -> String! {
         return text
-     }
+    }
 }
 
 class SwiftListenerImpl: SwiftHelloBinding_Listener {
@@ -44,7 +46,7 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
         setenv( "URLSessionCAInfo", cacheDir! + "/cacert.pem", 1 )
         setenv( "TMPDIR", cacheDir!, 1 )
         MyText("").withJavaObject { _ in }
-     }
+    }
 
     func testResponder( loopback: Int ) -> SwiftHelloTest_TestListener! {
         let test = SwiftTestListener()
@@ -62,30 +64,34 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
 
     // incoming from Java activity
     func processText( text: String? ) {
-        for _ in 0..<100 {
+        basicTests(reps: 10)
+        processText( text!, initial: true )
+    }
+
+    func basicTests(reps: Int) {
+        for _ in 0..<reps {
             let tester = responder.testResponder( loopback: 1 )!
             SwiftTestResponder().respond( to: tester )
         }
-        for i in 0..<100 {
+        for i in 0..<reps {
             var map = [String: SwiftHelloTypes_TextListener]()
             map["KEY\(i)"] = MyText("VALUE\(i)")
             map["KEY\(i+1)"] = MyText("VALUE\(i+1)")
             responder.processMap( map: map )
         }
-        for i in 0..<100 {
+        for i in 0..<reps {
             var map = [String: [SwiftHelloTypes_TextListener]]()
             map["KEY\(i)"] = [MyText("VALUE\(i)"), MyText("VALUE\(i)a")]
             map["KEY\(i)"] = [MyText("VALUE\(i+1)"), MyText("VALUE\(i+1)a")]
             responder.processMapList( map: map )
         }
-        processText( text!, initial: true )
     }
 
     func processedMap( map: [String: SwiftHelloTypes_TextListener]? ) {
         if let map = map {
             for (key, val) in map {
                 NSLog( "MAP: \(key) = \(val.getText())" )
-             }
+            }
         }
     }
 
@@ -94,7 +100,7 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
             for (key, val) in map {
                 NSLog( "MAP: \(key) = \(val[0].getText())" )
                 NSLog( "MAP: \(key) = \(val[1].getText())" )
-             }
+            }
         }
     }
 
@@ -115,7 +121,7 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
             if let data = data, let input = NSString( data: data, encoding: String.Encoding.utf8.rawValue ) {
                 for match in self.regexp.matches( in: String( describing: input ), options: [],
                                                   range: NSMakeRange( 0, input.length ) ) {
-                    out.append( "\(input.substring( with: match.range ))" )
+                                                    out.append( "\(input.substring( with: match.range ))" )
                 }
 
                 NSLog( "Display" )
@@ -126,7 +132,7 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
                 getrusage( RUSAGE_SELF, &memory )
                 NSLog( "Done \(memory.ru_maxrss) \(text)" )
             }
-        }.resume()
+            }.resume()
 
         if initial {
             SwiftListenerImpl.thread += 1
@@ -143,3 +149,5 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
         }
     }
 }
+
+

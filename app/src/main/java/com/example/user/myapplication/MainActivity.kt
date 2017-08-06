@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity(), Responder {
         copyResource(pemStream, pemfile)
         listener.setCacheDir(cacheDir)
         val tester = listener.testResponder(2)
-        for (i in 0..99) {
+        for (i in 0..10) {
             SwiftTestListener().respond(tester)
         }
         listener.processText("World")
