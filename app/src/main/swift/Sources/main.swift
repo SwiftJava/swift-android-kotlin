@@ -45,6 +45,8 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
     func setCacheDir( cacheDir: String? ) {
         setenv( "URLSessionCAInfo", cacheDir! + "/cacert.pem", 1 )
         setenv( "TMPDIR", cacheDir!, 1 )
+        // MyText Proxy object must be loaded
+        // on main thread before it is used.
         MyText("").withJavaObject { _ in }
     }
 
@@ -104,6 +106,20 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
         }
     }
 
+    func processStringMap( map: [String: String]? ) {
+        NSLog( "processStringMap: \(map!)")
+        responder.processedStringMap(map)
+    }
+
+    func processStringMapList( map: [String: [String]]? ) {
+        NSLog( "processStringMapList: \(map!)")
+        responder.processedStringMapList(map)
+    }
+
+    func throwException() throws -> Double {
+        throw Exception("A test exception")
+    }
+
     static var thread = 0
     let session = URLSession( configuration: .default )
     let url = URL( string: "https://en.wikipedia.org/wiki/Main_Page" )!
@@ -138,9 +154,9 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
             SwiftListenerImpl.thread += 1
             let background = SwiftListenerImpl.thread
             DispatchQueue.global().async {
-                for i in 1..<5000 {
+                for i in 1..<50 {
                     NSLog( "Sleeping" )
-                    sleep( 2 )
+                    sleep( 5 )
                     // outgoing back to Java
                     _ = responder.debug( msg: "Process \(background)/\(i)" )
                     self.processText( "World #\(i)", initial: false )
@@ -149,5 +165,3 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
         }
     }
 }
-
-

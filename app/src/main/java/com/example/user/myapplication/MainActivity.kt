@@ -10,15 +10,17 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
 
-import com.johnholdsworth.bindings.SwiftHelloBinding.Listener
-import com.johnholdsworth.bindings.SwiftHelloBinding.Responder
+import com.johnholdsworth.swiftbindings.SwiftHelloBinding.Listener
+import com.johnholdsworth.swiftbindings.SwiftHelloBinding.Responder
 
-import com.johnholdsworth.bindings.SwiftHelloTypes.TextListener
-import com.johnholdsworth.bindings.SwiftHelloTypes.ListenerMap
-import com.johnholdsworth.bindings.SwiftHelloTypes.ListenerMapList
+import com.johnholdsworth.swiftbindings.SwiftHelloTypes.TextListener
+import com.johnholdsworth.swiftbindings.SwiftHelloTypes.ListenerMap
+import com.johnholdsworth.swiftbindings.SwiftHelloTypes.ListenerMapList
+import com.johnholdsworth.swiftbindings.SwiftHelloTypes.StringMap
+import com.johnholdsworth.swiftbindings.SwiftHelloTypes.StringMapList
 
-import com.johnholdsworth.bindings.SwiftHelloTest.TestListener
-import com.johnholdsworth.bindings.SwiftHelloTest.SwiftTestListener
+import com.johnholdsworth.swiftbindings.SwiftHelloTest.TestListener
+import com.johnholdsworth.swiftbindings.SwiftHelloTest.SwiftTestListener
 
 import java.io.*
 
@@ -47,10 +49,23 @@ class MainActivity : AppCompatActivity(), Responder {
         val pemStream = SwiftApp.sharedApplication.getResources()?.openRawResource(R.raw.cacert)
         copyResource(pemStream, pemfile)
         listener.setCacheDir(cacheDir)
+
+        try {
+            listener.throwException()
+        }
+        catch (e: Exception) {
+            System.out.println("**** Got exception ****")
+            e.printStackTrace()
+        }
+
+        listener.processStringMap( StringMap(hashMapOf("hello" to "world")) )
+        listener.processStringMapList( StringMapList(hashMapOf(("hello" to Array(1, {"world"})) )))
+
         val tester = listener.testResponder(2)
-        for (i in 0..10) {
+        for (i in 0..9) {
             SwiftTestListener().respond(tester)
         }
+
         listener.processText("World")
     }
 
@@ -119,6 +134,14 @@ class MainActivity : AppCompatActivity(), Responder {
         listener.processedMapList( map )
     }
 
+    override fun processedStringMap(map: StringMap?) {
+        System.out.println("StringMapList: "+map!!)
+    }
+
+    override fun processedStringMapList(map: StringMapList?) {
+        System.out.println("StringMap: "+map!!)
+    }
+
     override fun debug(msg: String): Array<String> {
         System.out.println("Swift: " + msg)
         return arrayOf("!" + msg, msg + "!")
@@ -142,3 +165,4 @@ class MainActivity : AppCompatActivity(), Responder {
         }
     }
 }
+
