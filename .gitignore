@@ -16,5 +16,4 @@ Packages
 *.class
 *.so
 *.apk
-*.pins
 vcs.xml
