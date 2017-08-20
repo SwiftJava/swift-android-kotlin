@@ -43,17 +43,40 @@ public enum SwiftHelloTypes_Planet: Int, JNIObjectProtocol, JNIObjectInit {
         return SwiftHelloTypes_PlanetForward.values( )
     }
 
-    /// private double com.johnholdsworth.swiftbindings.SwiftHelloTypes$Planet.mass()
+    /// public double com.johnholdsworth.swiftbindings.SwiftHelloTypes$Planet.mass()
 
-    /// private double com.johnholdsworth.swiftbindings.SwiftHelloTypes$Planet.radius()
+    private static var mass_MethodID_3: jmethodID?
 
-    /// double com.johnholdsworth.swiftbindings.SwiftHelloTypes$Planet.surfaceGravity()
+    public func mass() -> Double {
+        return underlier().mass( )
+    }
 
-    // Skipping method: true false false false false 
+    /// public double com.johnholdsworth.swiftbindings.SwiftHelloTypes$Planet.radius()
 
-    /// double com.johnholdsworth.swiftbindings.SwiftHelloTypes$Planet.surfaceWeight(double)
+    private static var radius_MethodID_4: jmethodID?
 
-    // Skipping method: true false false false false 
+    public func radius() -> Double {
+        return underlier().radius( )
+    }
+
+    /// public double com.johnholdsworth.swiftbindings.SwiftHelloTypes$Planet.surfaceGravity()
+
+    private static var surfaceGravity_MethodID_5: jmethodID?
+
+    public func surfaceGravity() -> Double {
+        return underlier().surfaceGravity( )
+    }
+
+    /// public double com.johnholdsworth.swiftbindings.SwiftHelloTypes$Planet.surfaceWeight(double)
+
+    private static var surfaceWeight_MethodID_6: jmethodID?
+
+    public func surfaceWeight( otherMass: Double ) -> Double {
+        return underlier().surfaceWeight( otherMass: otherMass )
+    }
+    public func surfaceWeight( _ _otherMass: Double ) -> Double {
+        return surfaceWeight( otherMass: _otherMass )
+    }
 
 }
 
@@ -177,13 +200,13 @@ open class SwiftHelloTypes_PlanetForward: JNIObjectForward {
 
     /// public static com.johnholdsworth.swiftbindings.SwiftHelloTypes$Planet com.johnholdsworth.swiftbindings.SwiftHelloTypes$Planet.valueOf(java.lang.String)
 
-    private static var valueOf_MethodID_3: jmethodID?
+    private static var valueOf_MethodID_7: jmethodID?
 
     open class func valueOf( name: String? ) -> SwiftHelloTypes_Planet! {
         var __locals = [jobject]()
         var __args = [jvalue]( repeating: jvalue(), count: 1 )
         __args[0] = JNIType.toJava( value: name, locals: &__locals )
-        let __return = JNIMethod.CallStaticObjectMethod( className: "com/johnholdsworth/swiftbindings/SwiftHelloTypes$Planet", classCache: &SwiftHelloTypes_PlanetJNIClass, methodName: "valueOf", methodSig: "(Ljava/lang/String;)Lcom/johnholdsworth/swiftbindings/SwiftHelloTypes$Planet;", methodCache: &valueOf_MethodID_3, args: &__args, locals: &__locals )
+        let __return = JNIMethod.CallStaticObjectMethod( className: "com/johnholdsworth/swiftbindings/SwiftHelloTypes$Planet", classCache: &SwiftHelloTypes_PlanetJNIClass, methodName: "valueOf", methodSig: "(Ljava/lang/String;)Lcom/johnholdsworth/swiftbindings/SwiftHelloTypes$Planet;", methodCache: &valueOf_MethodID_7, args: &__args, locals: &__locals )
         defer { JNI.DeleteLocalRef( __return ) }
         return __return != nil ? SwiftHelloTypes_Planet( javaObject: __return ) : nil
     }
@@ -194,14 +217,14 @@ open class SwiftHelloTypes_PlanetForward: JNIObjectForward {
 
     /// public static java.lang.Enum java.lang.Enum.valueOf(java.lang.Class,java.lang.String)
 
-    private static var valueOf_MethodID_4: jmethodID?
+    private static var valueOf_MethodID_8: jmethodID?
 
     open class func valueOf( enumType: java_swift.JavaClass?, name: String? ) -> java_swift.JavaEnum! {
         var __locals = [jobject]()
         var __args = [jvalue]( repeating: jvalue(), count: 2 )
         __args[0] = JNIType.toJava( value: enumType, locals: &__locals )
         __args[1] = JNIType.toJava( value: name, locals: &__locals )
-        let __return = JNIMethod.CallStaticObjectMethod( className: "com/johnholdsworth/swiftbindings/SwiftHelloTypes$Planet", classCache: &SwiftHelloTypes_PlanetJNIClass, methodName: "valueOf", methodSig: "(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Enum;", methodCache: &valueOf_MethodID_4, args: &__args, locals: &__locals )
+        let __return = JNIMethod.CallStaticObjectMethod( className: "com/johnholdsworth/swiftbindings/SwiftHelloTypes$Planet", classCache: &SwiftHelloTypes_PlanetJNIClass, methodName: "valueOf", methodSig: "(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Enum;", methodCache: &valueOf_MethodID_8, args: &__args, locals: &__locals )
         defer { JNI.DeleteLocalRef( __return ) }
         return __return != nil ? java_swift.JavaEnum( javaObject: __return ) : nil
     }
@@ -212,12 +235,12 @@ open class SwiftHelloTypes_PlanetForward: JNIObjectForward {
 
     /// public static com.johnholdsworth.swiftbindings.SwiftHelloTypes$Planet[] com.johnholdsworth.swiftbindings.SwiftHelloTypes$Planet.values()
 
-    private static var values_MethodID_5: jmethodID?
+    private static var values_MethodID_9: jmethodID?
 
     open class func values() -> [SwiftHelloTypes_Planet]! {
         var __locals = [jobject]()
         var __args = [jvalue]( repeating: jvalue(), count: 1 )
-        let __return = JNIMethod.CallStaticObjectMethod( className: "com/johnholdsworth/swiftbindings/SwiftHelloTypes$Planet", classCache: &SwiftHelloTypes_PlanetJNIClass, methodName: "values", methodSig: "()[Lcom/johnholdsworth/swiftbindings/SwiftHelloTypes$Planet;", methodCache: &values_MethodID_5, args: &__args, locals: &__locals )
+        let __return = JNIMethod.CallStaticObjectMethod( className: "com/johnholdsworth/swiftbindings/SwiftHelloTypes$Planet", classCache: &SwiftHelloTypes_PlanetJNIClass, methodName: "values", methodSig: "()[Lcom/johnholdsworth/swiftbindings/SwiftHelloTypes$Planet;", methodCache: &values_MethodID_9, args: &__args, locals: &__locals )
         return JNIType.toSwift( type: [SwiftHelloTypes_Planet].self, from: __return )
     }
 
@@ -246,6 +269,18 @@ open class SwiftHelloTypes_PlanetForward: JNIObjectForward {
 
     // Skipping method: false true false false false 
 
+    /// public double com.johnholdsworth.swiftbindings.SwiftHelloTypes$Planet.mass()
+
+    private static var mass_MethodID_10: jmethodID?
+
+    open func mass() -> Double {
+        var __locals = [jobject]()
+        var __args = [jvalue]( repeating: jvalue(), count: 1 )
+        let __return = JNIMethod.CallDoubleMethod( object: javaObject, methodName: "mass", methodSig: "()D", methodCache: &SwiftHelloTypes_PlanetForward.mass_MethodID_10, args: &__args, locals: &__locals )
+        return __return
+    }
+
+
     /// public final java.lang.String java.lang.Enum.name()
 
     // Skipping method: false true false false false 
@@ -261,6 +296,46 @@ open class SwiftHelloTypes_PlanetForward: JNIObjectForward {
     /// public final int java.lang.Enum.ordinal()
 
     // Skipping method: false true false false false 
+
+    /// public double com.johnholdsworth.swiftbindings.SwiftHelloTypes$Planet.radius()
+
+    private static var radius_MethodID_11: jmethodID?
+
+    open func radius() -> Double {
+        var __locals = [jobject]()
+        var __args = [jvalue]( repeating: jvalue(), count: 1 )
+        let __return = JNIMethod.CallDoubleMethod( object: javaObject, methodName: "radius", methodSig: "()D", methodCache: &SwiftHelloTypes_PlanetForward.radius_MethodID_11, args: &__args, locals: &__locals )
+        return __return
+    }
+
+
+    /// public double com.johnholdsworth.swiftbindings.SwiftHelloTypes$Planet.surfaceGravity()
+
+    private static var surfaceGravity_MethodID_12: jmethodID?
+
+    open func surfaceGravity() -> Double {
+        var __locals = [jobject]()
+        var __args = [jvalue]( repeating: jvalue(), count: 1 )
+        let __return = JNIMethod.CallDoubleMethod( object: javaObject, methodName: "surfaceGravity", methodSig: "()D", methodCache: &SwiftHelloTypes_PlanetForward.surfaceGravity_MethodID_12, args: &__args, locals: &__locals )
+        return __return
+    }
+
+
+    /// public double com.johnholdsworth.swiftbindings.SwiftHelloTypes$Planet.surfaceWeight(double)
+
+    private static var surfaceWeight_MethodID_13: jmethodID?
+
+    open func surfaceWeight( otherMass: Double ) -> Double {
+        var __locals = [jobject]()
+        var __args = [jvalue]( repeating: jvalue(), count: 1 )
+        __args[0] = jvalue( d: otherMass )
+        let __return = JNIMethod.CallDoubleMethod( object: javaObject, methodName: "surfaceWeight", methodSig: "(D)D", methodCache: &SwiftHelloTypes_PlanetForward.surfaceWeight_MethodID_13, args: &__args, locals: &__locals )
+        return __return
+    }
+
+    open func surfaceWeight( _ _otherMass: Double ) -> Double {
+        return surfaceWeight( otherMass: _otherMass )
+    }
 
     /// public java.lang.String java.lang.Enum.toString()
 
