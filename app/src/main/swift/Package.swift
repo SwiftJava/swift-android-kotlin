@@ -5,7 +5,7 @@ let package = Package(
 	targets: [
 	],
     dependencies: [
-        .Package(url: "https://github.com/SwiftJava/java_swift.git", versions: Version(2,0,1)..<Version(3,0,0)),
+        .Package(url: "https://github.com/SwiftJava/java_swift.git", versions: Version(2,1,0)..<Version(3,0,0)),
         ]
 
 )

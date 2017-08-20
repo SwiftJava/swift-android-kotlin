@@ -25,7 +25,6 @@ import com.johnholdsworth.swiftbindings.SwiftHelloTest.SwiftTestListener
 import java.io.*
 
 class MainActivity : AppCompatActivity(), Responder {
-
     /** Implemented in src/main/swift/Sources/main.swift **/
 
     internal external fun bind(self: Responder): Listener
@@ -50,16 +49,19 @@ class MainActivity : AppCompatActivity(), Responder {
         copyResource(pemStream, pemfile)
         listener.setCacheDir(cacheDir)
 
-        try {
-            listener.throwException()
-        }
-        catch (e: Exception) {
-            System.out.println("**** Got exception ****")
-            e.printStackTrace()
+        for (i in 0..9) {
+            try {
+                listener.throwException()
+            } catch (e: Exception) {
+                System.out.println("**** Got Swift Exception ****")
+                e.printStackTrace()
+            }
         }
 
-        listener.processStringMap( StringMap(hashMapOf("hello" to "world")) )
-        listener.processStringMapList( StringMapList(hashMapOf(("hello" to Array(1, {"world"})) )))
+        for (i in 0..9) {
+            listener.processStringMap(StringMap(hashMapOf("hello" to "world")))
+            listener.processStringMapList(StringMapList(hashMapOf(("hello" to Array(1, { "world" })))))
+        }
 
         val tester = listener.testResponder(2)
         for (i in 0..9) {
@@ -142,6 +144,10 @@ class MainActivity : AppCompatActivity(), Responder {
         System.out.println("StringMap: "+map!!)
     }
 
+    override fun throwException(): Double {
+        throw Exception("Java test exception")
+    }
+
     override fun debug(msg: String): Array<String> {
         System.out.println("Swift: " + msg)
         return arrayOf("!" + msg, msg + "!")
@@ -165,4 +171,3 @@ class MainActivity : AppCompatActivity(), Responder {
         }
     }
 }
-
