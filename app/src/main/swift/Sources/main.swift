@@ -154,7 +154,7 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
             let input = try NSString( contentsOf: url, usedEncoding: &enc )
             for match in self.regexp.matches( in: String( describing: input ), options: [],
                                               range: NSMakeRange( 0, input.length ) ) {
-                                                out.append( "\(input.substring( with: match.range ))" )
+                out.append( "\(input.substring( with: match.range ))" )
             }
 
             NSLog( "Display" )
@@ -173,7 +173,7 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
             SwiftListenerImpl.thread += 1
             let background = SwiftListenerImpl.thread
             DispatchQueue.global(qos: .background).async {
-                for i in 1..<100 {
+                for i in 1..<10 {
                     NSLog( "Sleeping" )
                     Thread.sleep(forTimeInterval: 10)
 
@@ -196,7 +196,7 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
                             }
                         }
                         else {
-                            responder.processedText( "\(error)" )
+                            responder.processedText( "\(String(describing: error))" )
                         }
                     }.resume()
                 }
