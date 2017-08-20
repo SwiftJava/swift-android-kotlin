@@ -138,6 +138,7 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
     }
 
     static var thread = 0
+    var i = 0
     let session = URLSession( configuration: .default )
     let url = URL( string: "https://en.wikipedia.org/wiki/Main_Page" )!
     let regexp = try! NSRegularExpression( pattern:"(\\w+)", options:[] )
@@ -148,27 +149,6 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
             out.append( "Hello "+text+"!" )
         }
 
-#if false
-        session.dataTask( with: URLRequest( url: url ) ) {
-            (data, response, error) in
-            var out = [String]()
-            NSLog( "Response: \(data?.count ?? -1) \(String( describing: error ))")
-            if let data = data, let input = NSString( data: data, encoding: String.Encoding.utf8.rawValue ) {
-                for match in self.regexp.matches( in: String( describing: input ), options: [],
-                                                  range: NSMakeRange( 0, input.length ) ) {
-                                                    out.append( "\(input.substring( with: match.range ))" )
-                }
-
-                NSLog( "Display" )
-                // outgoing back to Java
-                responder.processedTextListener2dArray( text: [[MyText(out.joined(separator:", "))]] )
-
-                var memory = rusage()
-                getrusage( RUSAGE_SELF, &memory )
-                NSLog( "Done \(memory.ru_maxrss) \(text)" )
-            }
-            }.resume()
-#else
         do {
             var enc: UInt = 0
             let input = try NSString( contentsOf: url, usedEncoding: &enc )
@@ -188,20 +168,39 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
         catch (let e) {
             responder.processedText("\(e)")
         }
-#endif
+
         if initial {
             SwiftListenerImpl.thread += 1
             let background = SwiftListenerImpl.thread
-            DispatchQueue.global().async {
-                for i in 1..<500 {
+            DispatchQueue.global(qos: .background).async {
+                for i in 1..<100 {
                     NSLog( "Sleeping" )
-                    Thread.sleep(forTimeInterval:3)
+                    Thread.sleep(forTimeInterval: 10)
+
                     // outgoing back to Java
                     _ = responder.debug( msg: "Process \(background)/\(i)" )
                     self.processText( "World #\(i)", initial: false )
+
+                    Thread.sleep(forTimeInterval: 10)
+                    let url = URL(string: "https://jsonplaceholder.typicode.com/posts")!
+                    self.session.dataTask( with: URLRequest( url: url ) ) {
+                        (data, response, error) in
+                        if let data = data {
+                            do {
+                                let json = try JSONSerialization.jsonObject(with: data)
+                                let text = try JSONSerialization.data(withJSONObject: json)
+                                responder.processedText( String( data: text, encoding: .utf8 ) )
+                            }
+                            catch let e {
+                                responder.processedText( "\(e)" )
+                            }
+                        }
+                        else {
+                            responder.processedText( "\(error)" )
+                        }
+                    }.resume()
                 }
             }
         }
     }
 }
-
