@@ -25,8 +25,8 @@ import com.johnholdsworth.swiftbindings.SwiftHelloTest.SwiftTestListener
 import java.io.*
 
 class MainActivity : AppCompatActivity(), Responder {
-    /** Implemented in src/main/swift/Sources/main.swift **/
 
+    /** Implemented in src/main/swift/Sources/main.swift **/
     internal external fun bind(self: Responder): Listener
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +49,12 @@ class MainActivity : AppCompatActivity(), Responder {
         copyResource(pemStream, pemfile)
         listener.setCacheDir(cacheDir)
 
-        for (i in 0..9) {
+        basicTests(10)
+        listener.processText("World")
+    }
+
+    private fun basicTests(reps: Int) {
+        for (i in 1..reps) {
             try {
                 listener.throwException()
             } catch (e: Exception) {
@@ -58,17 +63,15 @@ class MainActivity : AppCompatActivity(), Responder {
             }
         }
 
-        for (i in 0..9) {
+        for (i in 1..reps) {
             listener.processStringMap(StringMap(hashMapOf("hello" to "world")))
             listener.processStringMapList(StringMapList(hashMapOf(("hello" to Array(1, { "world" })))))
         }
 
         val tester = listener.testResponder(2)
-        for (i in 0..9) {
+        for (i in 1..reps) {
             SwiftTestListener().respond(tester)
         }
-
-        listener.processText("World")
     }
 
     private fun copyResource(`in`: InputStream?, to: String) {
