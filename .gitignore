@@ -17,3 +17,4 @@ Packages
 *.so
 *.apk
 vcs.xml
+*.resolved

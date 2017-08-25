@@ -1,11 +1,20 @@
+// swift-tools-version:4.0
+
 import PackageDescription
 
 let package = Package(
-	name: "libswifthello.so",
-	targets: [
-	],
+    name: "swifthello",
+    products:[
+        .library(
+            name: "swifthello", 
+            type: .dynamic, 
+            targets:["swifthello"]
+        )
+    ],
     dependencies: [
-        .Package(url: "https://github.com/SwiftJava/java_swift.git", versions: Version(2,1,0)..<Version(3,0,0)),
-        ]
-
+        .package(url: "https://github.com/SwiftJava/java_swift.git", "2.1.0"..<"3.0.0"),
+    ],
+    targets: [
+        .target(name: "swifthello", dependencies: ["java_swift"], path: "Sources"),
+    ]
 )
