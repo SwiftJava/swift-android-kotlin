@@ -2,6 +2,7 @@
 import java_swift
 import Foundation
 import Dispatch
+import sqlite3
 
 // link back to Java side of Application
 var responder: SwiftHelloBinding_ResponderForward!
@@ -42,12 +43,54 @@ struct MyText: SwiftHelloTypes_TextListener {
 
 class SwiftListenerImpl: SwiftHelloBinding_Listener {
 
+    var handle: OpaquePointer? = nil
+
     func setCacheDir( cacheDir: String? ) {
-        setenv( "URLSessionCAInfo", cacheDir! + "/cacert.pem", 1 )
         setenv( "TMPDIR", cacheDir!, 1 )
+
+        // Required for SSL to work
+        setenv( "URLSessionCAInfo", cacheDir! + "/cacert.pem", 1 )
+
         // MyText Proxy object must be loaded
         // on main thread before it is used.
         MyText("").withJavaObject { _ in }
+
+        // Quick SQLite test
+        NSLog("Open db: \(sqlite3_open(cacheDir!+"sqltest.db", &handle) == SQLITE_OK)")
+
+        NSLog("Create table: \(sqlite3_exec(handle, """
+            CREATE TABLE Test (
+            Text TEXT
+            )
+            """, nil, nil, nil) == SQLITE_OK)")
+
+        let f = DateFormatter()
+        f.dateStyle = .long
+        f.timeStyle = .long
+        f.timeZone = TimeZone.current
+
+        var stmt: OpaquePointer?
+        NSLog("Insert: \(sqlite3_prepare_v2(handle, """
+            INSERT INTO Test (Text)
+            VALUES (?);
+            """, -1, &stmt, nil) == SQLITE_OK)")
+        sqlite3_bind_text(stmt, 1, f.string(from: Date()), -1, nil)
+        sqlite3_step(stmt)
+        sqlite3_finalize(stmt)
+
+        NSLog("Select: \(sqlite3_prepare_v2( handle, """
+            SELECT Text
+            FROM Test
+            """, -1, &stmt, nil) == SQLITE_OK)")
+        while sqlite3_step(stmt) == SQLITE_ROW {
+            if let text = sqlite3_column_text(stmt, 0) {
+                NSLog("Run: \(String(cString: text))")
+            }
+            else {
+                NSLog("Null row")
+            }
+        }
+        sqlite3_finalize(stmt)
     }
 
     func testResponder( loopback: Int ) -> SwiftHelloTest_TestListener! {
@@ -66,6 +109,9 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
 
     // incoming from Java activity
     func processText( text: String? ) {
+        let uuidA = NSUUID()
+        let uuidB = NSKeyedUnarchiver.unarchiveObject(with: NSKeyedArchiver.archivedData(withRootObject: uuidA)) as! NSUUID
+
         basicTests(reps: 10)
         processText( text!, initial: true )
     }
@@ -154,7 +200,7 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
             let input = try NSString( contentsOf: url, usedEncoding: &enc )
             for match in self.regexp.matches( in: String( describing: input ), options: [],
                                               range: NSMakeRange( 0, input.length ) ) {
-                out.append( "\(input.substring( with: match.range ))" )
+                                                out.append( "\(input.substring( with: match.range ))" )
             }
 
             NSLog( "Display" )
@@ -173,7 +219,7 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
             SwiftListenerImpl.thread += 1
             let background = SwiftListenerImpl.thread
             DispatchQueue.global(qos: .background).async {
-                for i in 1..<10 {
+                for i in 1..<100 {
                     NSLog( "Sleeping" )
                     Thread.sleep(forTimeInterval: 10)
 
@@ -198,9 +244,10 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
                         else {
                             responder.processedText( "\(String(describing: error))" )
                         }
-                    }.resume()
+                        }.resume()
                 }
             }
         }
     }
 }
+
