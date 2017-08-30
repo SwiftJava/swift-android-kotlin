@@ -2,7 +2,10 @@
 import java_swift
 import Foundation
 import Dispatch
+
+// toolchain beta III
 import sqlite3
+import XCTest
 
 // link back to Java side of Application
 var responder: SwiftHelloBinding_ResponderForward!
@@ -91,6 +94,11 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
             }
         }
         sqlite3_finalize(stmt)
+
+        // XCTest test
+        let uuidA = NSUUID()
+        let uuidB = NSKeyedUnarchiver.unarchiveObject(with: NSKeyedArchiver.archivedData(withRootObject: uuidA)) as! NSUUID
+        XCTAssertEqual(uuidA, uuidB, "NSKeyedUnarchiver check")
     }
 
     func testResponder( loopback: Int ) -> SwiftHelloTest_TestListener! {
@@ -109,9 +117,6 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
 
     // incoming from Java activity
     func processText( text: String? ) {
-        let uuidA = NSUUID()
-        let uuidB = NSKeyedUnarchiver.unarchiveObject(with: NSKeyedArchiver.archivedData(withRootObject: uuidA)) as! NSUUID
-
         basicTests(reps: 10)
         processText( text!, initial: true )
     }
@@ -250,4 +255,3 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
         }
     }
 }
-
