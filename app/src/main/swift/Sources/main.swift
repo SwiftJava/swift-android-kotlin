@@ -1,11 +1,13 @@
 
 import java_swift
 import Foundation
-import Dispatch
 
 // toolchain beta III
 import sqlite3
 import XCTest
+
+// toolchain release candidate
+import Alamofire
 
 // link back to Java side of Application
 var responder: SwiftHelloBinding_ResponderForward!
@@ -52,7 +54,7 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
         setenv( "TMPDIR", cacheDir!, 1 )
 
         // Required for SSL to work
-        setenv( "URLSessionCAInfo", cacheDir! + "/cacert.pem", 1 )
+        setenv( "URLSessionCertificateAuthorityInfoFile", cacheDir! + "/cacert.pem", 1 )
 
         // MyText Proxy object must be loaded
         // on main thread before it is used.
@@ -205,7 +207,7 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
             let input = try NSString( contentsOf: url, usedEncoding: &enc )
             for match in self.regexp.matches( in: String( describing: input ), options: [],
                                               range: NSMakeRange( 0, input.length ) ) {
-                                                out.append( "\(input.substring( with: match.range ))" )
+                out.append( "\(input.substring( with: match.range ))" )
             }
 
             NSLog( "Display" )
@@ -223,33 +225,51 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
         if initial {
             SwiftListenerImpl.thread += 1
             let background = SwiftListenerImpl.thread
-            DispatchQueue.global(qos: .background).async {
-                for i in 1..<100 {
-                    NSLog( "Sleeping" )
-                    Thread.sleep(forTimeInterval: 10)
 
-                    // outgoing back to Java
-                    _ = responder.debug( msg: "Process \(background)/\(i)" )
-                    self.processText( "World #\(i)", initial: false )
+            for _ in 0..<1 {
+                DispatchQueue.global(qos: .background).async {
+                    for i in 1..<10 {
+                        NSLog( "Sleeping" )
+                        Thread.sleep(forTimeInterval: 3)
 
-                    Thread.sleep(forTimeInterval: 10)
-                    let url = URL(string: "https://jsonplaceholder.typicode.com/posts")!
-                    self.session.dataTask( with: URLRequest( url: url ) ) {
-                        (data, response, error) in
-                        if let data = data {
-                            do {
-                                let json = try JSONSerialization.jsonObject(with: data)
-                                let text = try JSONSerialization.data(withJSONObject: json)
-                                responder.processedText( String( data: text, encoding: .utf8 ) )
+                        // outgoing back to Java
+                        _ = responder.debug( msg: "Process \(background)/\(i)" )
+                        self.processText( "World #\(i)", initial: false )
+
+                        Thread.sleep(forTimeInterval: 2)
+                        let url = URL(string: "http://jsonplaceholder.typicode.com/posts")!
+                        self.session.dataTask( with: URLRequest( url: url ) ) {
+                            (data, response, error) in
+                            if let data = data {
+                                do {
+                                    let json = try JSONSerialization.jsonObject(with: data)
+                                    let text = try JSONSerialization.data(withJSONObject: json)
+                                    responder.processedText( String( data: text, encoding: .utf8 ) )
+                                }
+                                catch let e {
+                                    responder.processedText( "\(e)" )
+                                }
                             }
-                            catch let e {
-                                responder.processedText( "\(e)" )
+                            else {
+                                responder.processedText( "\(String(describing: error))" )
                             }
-                        }
-                        else {
-                            responder.processedText( "\(String(describing: error))" )
-                        }
                         }.resume()
+
+                        Thread.sleep(forTimeInterval: 2)
+                        Alamofire.request("https://httpbin.org/get").responseJSON { response in
+                            NSLog("Request: \(String(describing: response.request))")   // original url request
+                            NSLog("Response: \(String(describing: response.response))") // http url response
+                            NSLog("Result: \(response.result)")                         // response serialization result
+
+                            if let json = response.result.value {
+                                NSLog("JSON: \(json)") // serialized json response
+                            }
+
+                            if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
+                                NSLog("Data: \(utf8Text)") // original server data as UTF8 string
+                            }
+                        }
+                    }
                 }
             }
         }
