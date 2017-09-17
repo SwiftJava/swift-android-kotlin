@@ -6,11 +6,14 @@ import Foundation
 import sqlite3
 import XCTest
 
-// toolchain release candidate
+// toolchain release candidates
 import Alamofire
+import AndroidInjection
 
-// link back to Java side of Application
-var responder: SwiftHelloBinding_ResponderForward!
+// responder variable moved to Statics.swift
+// so it isn't reset when class is injected.
+//// link back to Java side of Application
+//var responder: SwiftHelloBinding_ResponderForward!
 
 // one-off call to bind the Java and Swift sections of app
 @_silgen_name("Java_net_zhuoweizhang_swifthello_SwiftHello_bind")
@@ -59,43 +62,54 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
         // MyText Proxy object must be loaded
         // on main thread before it is used.
         MyText("").withJavaObject { _ in }
+        ClosureRunnable({}).withJavaObject { _ in }
 
-        // Quick SQLite test
-        NSLog("Open db: \(sqlite3_open(cacheDir!+"sqltest.db", &handle) == SQLITE_OK)")
+        DispatchQueue.main.sync {
+            // Quick SQLite test
+            NSLog("Open db: \(sqlite3_open(cacheDir!+"sqltest.db", &handle) == SQLITE_OK)")
 
-        NSLog("Create table: \(sqlite3_exec(handle, """
-            CREATE TABLE Test (
-            Text TEXT
-            )
-            """, nil, nil, nil) == SQLITE_OK)")
+            NSLog("Create table: \(sqlite3_exec(handle, """
+                CREATE TABLE Test (
+                Text TEXT
+                )
+                """, nil, nil, nil) == SQLITE_OK)")
 
-        let f = DateFormatter()
-        f.dateStyle = .long
-        f.timeStyle = .long
-        f.timeZone = TimeZone.current
+            var stmt: OpaquePointer?
 
-        var stmt: OpaquePointer?
-        NSLog("Insert: \(sqlite3_prepare_v2(handle, """
-            INSERT INTO Test (Text)
-            VALUES (?);
-            """, -1, &stmt, nil) == SQLITE_OK)")
-        sqlite3_bind_text(stmt, 1, f.string(from: Date()), -1, nil)
-        sqlite3_step(stmt)
-        sqlite3_finalize(stmt)
-
-        NSLog("Select: \(sqlite3_prepare_v2( handle, """
-            SELECT Text
-            FROM Test
-            """, -1, &stmt, nil) == SQLITE_OK)")
-        while sqlite3_step(stmt) == SQLITE_ROW {
-            if let text = sqlite3_column_text(stmt, 0) {
-                NSLog("Run: \(String(cString: text))")
+            let f = DateFormatter()
+            f.dateStyle = .long
+            f.timeStyle = .long
+            f.timeZone = TimeZone.current
+            f.string(from: Date()).withCString {
+                NSLog("Insert: \(sqlite3_prepare_v2(handle, """
+                    INSERT INTO Test (Text)
+                    VALUES (?);
+                    """, -1, &stmt, nil) == SQLITE_OK)")
+                sqlite3_bind_text(stmt, 1, $0, -1, nil)
+                sqlite3_step(stmt)
+                sqlite3_finalize(stmt)
             }
-            else {
-                NSLog("Null row")
+
+            NSLog("Select: \(sqlite3_prepare_v2( handle, """
+                SELECT Text
+                FROM Test
+                """, -1, &stmt, nil) == SQLITE_OK)")
+            while sqlite3_step(stmt) == SQLITE_ROW {
+                if let text = sqlite3_column_text(stmt, 0) {
+                    NSLog("Run: \(String(cString: text))")
+                }
+                else {
+                    NSLog("Null row")
+                }
             }
+            sqlite3_finalize(stmt)
         }
-        sqlite3_finalize(stmt)
+
+        // Support for runtime code moddification
+        AndroidInjection.connectAndRun(forMainThread: {
+            closurePerformingInjection in
+            responder.onMainThread( ClosureRunnable(closurePerformingInjection) )
+        })
 
         // XCTest test
         let uuidA = NSUUID()
@@ -207,7 +221,7 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
             let input = try NSString( contentsOf: url, usedEncoding: &enc )
             for match in self.regexp.matches( in: String( describing: input ), options: [],
                                               range: NSMakeRange( 0, input.length ) ) {
-                out.append( "\(input.substring( with: match.range ))" )
+                                                out.append( "\(input.substring( with: match.range ))" )
             }
 
             NSLog( "Display" )
@@ -225,53 +239,71 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
         if initial {
             SwiftListenerImpl.thread += 1
             let background = SwiftListenerImpl.thread
+            let other = OtherClass()
+            DispatchQueue.main.async {
+                for t in 0..<1 {
+                    DispatchQueue.global(qos: .background).async {
+                        for i in 1..<10 {
+                            NSLog( "Sleeping" )
+                            Thread.sleep(forTimeInterval: 3)
 
-            for _ in 0..<1 {
-                DispatchQueue.global(qos: .background).async {
-                    for i in 1..<10 {
-                        NSLog( "Sleeping" )
-                        Thread.sleep(forTimeInterval: 3)
+                            // outgoing back to Java
+                            _ = responder.debug( msg: "Process \(background)/\(i)" )
+                            self.processText( "World #\(t).\(i)", initial: false )
 
-                        // outgoing back to Java
-                        _ = responder.debug( msg: "Process \(background)/\(i)" )
-                        self.processText( "World #\(i)", initial: false )
-
-                        Thread.sleep(forTimeInterval: 2)
-                        let url = URL(string: "http://jsonplaceholder.typicode.com/posts")!
-                        self.session.dataTask( with: URLRequest( url: url ) ) {
-                            (data, response, error) in
-                            if let data = data {
-                                do {
-                                    let json = try JSONSerialization.jsonObject(with: data)
-                                    let text = try JSONSerialization.data(withJSONObject: json)
-                                    responder.processedText( String( data: text, encoding: .utf8 ) )
-                                }
-                                catch let e {
-                                    responder.processedText( "\(e)" )
-                                }
-                            }
-                            else {
-                                responder.processedText( "\(String(describing: error))" )
-                            }
-                        }.resume()
-
-                        Thread.sleep(forTimeInterval: 2)
-                        Alamofire.request("https://httpbin.org/get").responseJSON { response in
-                            NSLog("Request: \(String(describing: response.request))")   // original url request
-                            NSLog("Response: \(String(describing: response.response))") // http url response
-                            NSLog("Result: \(response.result)")                         // response serialization result
-
-                            if let json = response.result.value {
-                                NSLog("JSON: \(json)") // serialized json response
-                            }
-
-                            if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
-                                NSLog("Data: \(utf8Text)") // original server data as UTF8 string
-                            }
+                            self.iteration(other: other)
                         }
                     }
                 }
             }
         }
+    }
+
+    func iteration(other: OtherClass) {
+        NSLog("Iteration")
+
+        other.log()
+
+        Thread.sleep(forTimeInterval: 2)
+        let url = URL(string: "http://jsonplaceholder.typicode.com/posts")!
+        session.dataTask( with: URLRequest( url: url ) ) {
+            (data, response, error) in
+            if let data = data {
+                do {
+                    let json = try JSONSerialization.jsonObject(with: data)
+                    let text = try JSONSerialization.data(withJSONObject: json)
+                    responder.processedText( String( data: text, encoding: .utf8 ) )
+                }
+                catch let e {
+                    responder.processedText( "\(e)" )
+                }
+            }
+            else {
+                responder.processedText( "\(String(describing: error))" )
+            }
+            }.resume()
+
+        Thread.sleep(forTimeInterval: 2)
+        Alamofire.request("https://httpbin.org/get").responseJSON { response in
+            NSLog("Request: \(String(describing: response.request))")   // original url request
+            NSLog("Response: \(String(describing: response.response))") // http url response
+            NSLog("Result: \(response.result)")                         // response serialization result
+
+            if let json = response.result.value {
+                NSLog("JSON: \(json)") // serialized json response
+                //                let archive = NSKeyedArchiver.archivedData(withRootObject: json)
+                //                let object = NSKeyedUnarchiver.unarchiveObject(with: archive)
+            }
+
+            if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
+                NSLog("Data: \(utf8Text)") // original server data as UTF8 string
+            }
+        }
+    }
+}
+
+class OtherClass {
+    func log() {
+        NSLog("Injectable message")
     }
 }

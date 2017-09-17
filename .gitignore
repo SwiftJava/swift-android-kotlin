@@ -9,6 +9,7 @@ jniLibs
 /captures
 .externalNativeBuild
 *.pins
+*.resolved
 .build
 build
 jniLibs

@@ -40,17 +40,22 @@ class MainActivity : AppCompatActivity(), Responder {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
-        loadNativeDependencies()
-        listener = bind(this)
-        val context = SwiftApp.sharedApplication.getApplicationContext()
-        val cacheDir = context?.getCacheDir()?.getPath()
-        val pemfile = cacheDir + "/cacert.pem"
-        val pemStream = SwiftApp.sharedApplication.getResources()?.openRawResource(R.raw.cacert)
-        copyResource(pemStream, pemfile)
-        listener.setCacheDir(cacheDir)
 
-        basicTests(10)
-        listener.processText("World")
+        Thread() {
+            loadNativeDependencies()
+
+            listener = bind(this)
+            val context = SwiftApp.sharedApplication.getApplicationContext()
+            val cacheDir = context?.getCacheDir()?.getPath()
+            val pemfile = cacheDir + "/cacert.pem"
+            val pemStream = SwiftApp.sharedApplication.getResources()?.openRawResource(R.raw.cacert)
+            copyResource(pemStream, pemfile)
+            listener.setCacheDir(cacheDir)
+
+            basicTests(10)
+
+            listener.processText("World")
+        }.start()
     }
 
     private fun basicTests(reps: Int) {
@@ -154,6 +159,10 @@ class MainActivity : AppCompatActivity(), Responder {
     override fun debug(msg: String): Array<String> {
         System.out.println("Swift: " + msg)
         return arrayOf("!" + msg, msg + "!")
+    }
+
+    override fun onMainThread(runnable: Runnable?) {
+        runOnUiThread(runnable)
     }
 
     override fun testResponder(loopback: Int): TestListener {
