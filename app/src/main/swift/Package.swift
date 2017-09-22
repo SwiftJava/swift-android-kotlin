@@ -9,5 +9,6 @@ let package = Package(
         .Package(url: "https://github.com/SwiftJava/swift-android-sqlite.git", majorVersion: 1),
         .Package(url: "https://github.com/SwiftJava/swift-android-injection.git", majorVersion: 1),
         .Package(url: "https://github.com/SwiftJava/Alamofire.git", majorVersion: 4),
+        .Package(url: "https://github.com/johnno1962/Fortify.git", majorVersion: 1),
     ]
 )

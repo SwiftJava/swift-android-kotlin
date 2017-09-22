@@ -2,13 +2,13 @@
 import java_swift
 import Foundation
 
-// toolchain beta III
+import Alamofire
 import sqlite3
 import XCTest
 
-// toolchain release candidates
-import Alamofire
+// 1.0 toolchain required
 import AndroidInjection
+import Fortify
 
 // responder variable moved to Statics.swift
 // so it isn't reset when class is injected.
@@ -103,13 +103,44 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
                 }
             }
             sqlite3_finalize(stmt)
+
+
+            do {
+                try Fortify.exec {
+                    var a: String!
+                    _ = a!
+                }
+            }
+            catch {
+                NSLog("Caught exception: \(error)")
+            }
+
+            DispatchQueue.global().async {
+                do {
+                    try Fortify.exec {
+                        var a: String!
+                        _ = a!
+                    }
+                }
+                catch {
+                    NSLog("Caught exception: \(error)")
+                }
+
+                var a: String!
+                _ = a!
+            }
         }
 
         // Support for runtime code moddification
+        #if false
+        AndroidInjection.connectAndRun()
+        #else
+        // more reliable if load jams on slower devices
         AndroidInjection.connectAndRun(forMainThread: {
             closurePerformingInjection in
             responder.onMainThread( ClosureRunnable(closurePerformingInjection) )
         })
+        #endif
 
         // XCTest test
         let uuidA = NSUUID()
@@ -291,8 +322,8 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
 
             if let json = response.result.value {
                 NSLog("JSON: \(json)") // serialized json response
-                //                let archive = NSKeyedArchiver.archivedData(withRootObject: json)
-                //                let object = NSKeyedUnarchiver.unarchiveObject(with: archive)
+//                let archive = NSKeyedArchiver.archivedData(withRootObject: json)
+//                let object = NSKeyedUnarchiver.unarchiveObject(with: archive)
             }
 
             if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
@@ -304,6 +335,7 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
 
 class OtherClass {
     func log() {
-        NSLog("Injectable message")
+        NSLog("Injectable message #1")
     }
 }
+
