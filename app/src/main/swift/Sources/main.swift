@@ -6,10 +6,6 @@ import Alamofire
 import sqlite3
 import XCTest
 
-// 1.0 toolchain required
-import AndroidInjection
-import Fortify
-
 // responder variable moved to Statics.swift
 // so it isn't reset when class is injected.
 //// link back to Java side of Application
@@ -103,44 +99,7 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
                 }
             }
             sqlite3_finalize(stmt)
-
-
-            do {
-                try Fortify.exec {
-                    var a: String!
-                    _ = a!
-                }
-            }
-            catch {
-                NSLog("Caught exception: \(error)")
-            }
-
-            DispatchQueue.global().async {
-                do {
-                    try Fortify.exec {
-                        var a: String!
-                        _ = a!
-                    }
-                }
-                catch {
-                    NSLog("Caught exception: \(error)")
-                }
-
-                var a: String!
-                _ = a!
-            }
         }
-
-        // Support for runtime code moddification
-        #if false
-        AndroidInjection.connectAndRun()
-        #else
-        // more reliable if load jams on slower devices
-        AndroidInjection.connectAndRun(forMainThread: {
-            closurePerformingInjection in
-            responder.onMainThread( ClosureRunnable(closurePerformingInjection) )
-        })
-        #endif
 
         // XCTest test
         let uuidA = NSUUID()
