@@ -1,12 +1,21 @@
+// swift-tools-version:4.0
 import PackageDescription
 
 let package = Package(
-    name: "libswifthello.so",
-    targets: [
+    name: "swifthello",
+    products: [
+        .library(name: "swifthello", type: .dynamic, targets: ["swifthello"])
     ],
     dependencies: [
-        .Package(url: "https://github.com/SwiftJava/java_swift.git", versions: Version(2,1,1)..<Version(3,0,0)),
-        .Package(url: "https://github.com/SwiftJava/swift-android-sqlite.git", majorVersion: 1),
-        .Package(url: "https://github.com/SwiftJava/Alamofire.git", majorVersion: 4),
+        .package(url: "https://github.com/SwiftJava/java_swift.git", "2.1.1"..<"3.0.0"),
+        .package(url: "https://github.com/SwiftJava/swift-android-sqlite.git", from: "1.0.0"),
+        .package(url: "https://github.com/SwiftJava/Alamofire.git", from: "4.0.0"),
+    ],
+    targets: [
+        .target(
+            name: "swifthello",
+            dependencies: ["java_swift", "Alamofire"],
+            path: "Sources"
+        ),
     ]
 )
