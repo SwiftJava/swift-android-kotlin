@@ -1,6 +1,7 @@
 
 package com.example.user.myapplication
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.Snackbar
@@ -8,6 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ImageView
 import android.widget.TextView
 
 import com.johnholdsworth.swiftbindings.SwiftHelloBinding.Listener
@@ -23,8 +25,22 @@ import com.johnholdsworth.swiftbindings.SwiftHelloTest.TestListener
 import com.johnholdsworth.swiftbindings.SwiftHelloTest.SwiftTestListener
 
 import java.io.*
+import android.view.MotionEvent
+import android.view.View
+import android.view.View.OnTouchListener
+
+
 
 class MainActivity : AppCompatActivity(), Responder {
+
+    var myImage: ImageView? = null
+
+    override fun displayImage(pixels: IntArray?) {
+        val bm = Bitmap.createBitmap(pixels, myImage!!.width, myImage!!.height, Bitmap.Config.ARGB_8888)
+        runOnUiThread {
+            myImage!!.setImageBitmap(bm)
+        }
+    }
 
     /** Implemented in src/main/swift/Sources/main.swift **/
     internal external fun bind(self: Responder): Listener
@@ -52,9 +68,9 @@ class MainActivity : AppCompatActivity(), Responder {
             copyResource(pemStream, pemfile)
             listener.setCacheDir(cacheDir)
 
-            basicTests(10)
+            //basicTests(10)
 
-            listener.processText("World")
+            //listener.processText("World")
         }.start()
     }
 
@@ -95,7 +111,16 @@ class MainActivity : AppCompatActivity(), Responder {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
+        myImage = findViewById(R.id.imageView) as ImageView
+        listener.setupImage(myImage!!.width, myImage!!.height)
         return true
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if(event.getActionMasked() == MotionEvent.ACTION_MOVE && event.getX().toInt() != 0) {
+            listener.drawPoint(event.getX().toInt(), (event.getY()+myImage!!.y).toInt())
+        }
+        return true;
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

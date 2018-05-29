@@ -30,6 +30,10 @@ public interface SwiftHelloBinding {
 
         public SwiftHelloTest.TestListener testResponder( int loopback );
 
+        public void setupImage( int width, int height );
+
+        public void drawPoint( int x, int y );
+
     }
 
     // Messages from Swift back to Activity
@@ -60,6 +64,8 @@ public interface SwiftHelloBinding {
         public void onMainThread( Runnable runnable );
 
         public SwiftHelloTest.TestListener testResponder( int loopback );
+
+        public void displayImage( int pixels[] );
 
     }
 

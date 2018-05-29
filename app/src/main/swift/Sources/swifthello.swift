@@ -47,6 +47,33 @@ struct MyText: SwiftHelloTypes_TextListener {
 
 class SwiftListenerImpl: SwiftHelloBinding_Listener {
 
+    var pixels1: [Int32]!
+    var pixels2: [Int32]!
+    var rowwidth = 0
+
+    func setupImage( width: Int, height: Int ) {
+        NSLog("\(width)x\(height)")
+        pixels1 = [Int32](repeating: 0x7fff0000, count: width * height)
+        pixels2 = [Int32](repeating: 0x7f00ff00, count: width * height)
+        rowwidth = width
+        DispatchQueue.global(qos: .background).async {
+            for _ in 0..<10 {
+                responder.displayImage( self.pixels1 )
+                responder.displayImage( self.pixels2 )
+            }
+        }
+    }
+
+    func drawPoint( x: Int, y: Int ) {
+        NSLog("\(x),\(y) \(x+y*rowwidth)")
+        for y in y..<(y+16) {
+            for x in x..<(x+16) {
+                pixels1[x+y*rowwidth] = 0x7f000000
+            }
+         }
+         responder.displayImage( self.pixels1 )
+    }
+
     var handle: OpaquePointer? = nil
 
     func setCacheDir( cacheDir: String? ) {
@@ -290,6 +317,7 @@ class SwiftListenerImpl: SwiftHelloBinding_Listener {
             }
         }
     }
+
 }
 
 class OtherClass {
