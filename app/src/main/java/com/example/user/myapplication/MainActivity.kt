@@ -23,6 +23,10 @@ import com.johnholdsworth.swiftbindings.SwiftHelloTest.TestListener
 import com.johnholdsworth.swiftbindings.SwiftHelloTest.SwiftTestListener
 
 import java.io.*
+import android.opengl.GLSurfaceView
+import android.view.MotionEvent
+import com.johnholdsworth.swiftbindings.SwiftHelloBinding
+
 
 class MainActivity : AppCompatActivity(), Responder {
 
@@ -52,9 +56,9 @@ class MainActivity : AppCompatActivity(), Responder {
             copyResource(pemStream, pemfile)
             listener.setCacheDir(cacheDir)
 
-            basicTests(10)
-
-            listener.processText("World")
+//            basicTests(10)
+//
+//            listener.processText("World")
         }.start()
     }
 
@@ -92,10 +96,25 @@ class MainActivity : AppCompatActivity(), Responder {
 
     }
 
+    private var glSurfaceView: GLSurfaceView? = null
+    private var renderer: SwiftHelloBinding.RenderListener? = null
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
+        glSurfaceView = GLSurfaceView(this)
+        glSurfaceView!!.setEGLContextClientVersion(2)
+        renderer = listener.getRenderer()
+        glSurfaceView!!.setRenderer(RendererWrapper(renderer))
+        setContentView(glSurfaceView)
         return true
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if(event.getActionMasked() == MotionEvent.ACTION_MOVE && event.getX().toInt() != 0) {
+            renderer!!.drawPoint(event.getX().toInt(), event.getY().toInt())
+        }
+        return true;
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

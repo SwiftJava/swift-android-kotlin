@@ -6,6 +6,8 @@ import Alamofire
 import sqlite3
 import XCTest
 
+import OpenGLESv2
+
 // responder variable moved to Statics.swift
 // so it isn't reset when class is injected.
 //// link back to Java side of Application
@@ -45,9 +47,40 @@ struct MyText: SwiftHelloTypes_TextListener {
     }
 }
 
+class GLRendererImpl: SwiftHelloBinding_RenderListener {
+
+    var width: GLfloat = 0.001,  height: GLfloat = 0.001,  g: GLfloat = 0.0,  b: GLfloat = 0.0
+
+    func onSurfaceCreated() {
+	    glClearColor(1.0, 0.0, 0.0, 0.0)
+    }
+
+    func onSurfaceChanged(width: Int, height: Int) {
+	    self.width = GLfloat(width)
+	    self.height = GLfloat(height)
+    }
+
+    func onDrawFrame() {
+        var vbo: GLuint = 0;
+	    glClearColor(1.0, g, b, 0.0)
+	    glClear(UInt32(GL_COLOR_BUFFER_BIT))
+    }
+
+    func drawPoint(x: Int, y: Int) {
+        g = GLfloat(x)/width
+        b = GLfloat(y)/height
+    }
+
+}
+
+
 class SwiftListenerImpl: SwiftHelloBinding_Listener {
 
     var handle: OpaquePointer? = nil
+
+    func getRenderer() -> SwiftHelloBinding_RenderListener! {
+        return GLRendererImpl()
+    }
 
     func setCacheDir( cacheDir: String? ) {
         setenv( "TMPDIR", cacheDir!, 1 )

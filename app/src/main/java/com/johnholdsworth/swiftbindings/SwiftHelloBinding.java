@@ -9,10 +9,21 @@ import com.johnholdsworth.swiftbindings.SwiftHelloTypes.StringMapList;
 
 public interface SwiftHelloBinding {
 
+    public interface RenderListener {
+
+        public void onSurfaceCreated();
+        public void onSurfaceChanged(int width, int height);
+        public void onDrawFrame();
+        public void drawPoint( int x, int y );
+
+    }
+
     // Messages from JavaActivity to Swift
     public interface Listener {
 
         public void setCacheDir( String cacheDir );
+
+        public RenderListener getRenderer();
 
         public void processNumber( double number );
 
