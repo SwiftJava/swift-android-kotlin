@@ -6,7 +6,7 @@ import Alamofire
 import sqlite3
 import XCTest
 
-import OpenGLESv2
+import OpenGLES
 
 // responder variable moved to Statics.swift
 // so it isn't reset when class is injected.
@@ -49,26 +49,48 @@ struct MyText: SwiftHelloTypes_TextListener {
 
 class GLRendererImpl: SwiftHelloBinding_RenderListener {
 
-    var width: GLfloat = 0.001,  height: GLfloat = 0.001,  g: GLfloat = 0.0,  b: GLfloat = 0.0
+    var scene: Scene!
+    var projectionMatrix: Matrix4!
 
     func onSurfaceCreated() {
-	    glClearColor(1.0, 0.0, 0.0, 0.0)
+        glClearColor(0.0, 0.0, 0.0, 0.0)
+//        glClearDepth(1.0)
+        glDisable(GLenum(GL_BLEND))
+        glEnable(GLenum(GL_DEPTH_TEST))
+        glDepthFunc(GLenum(GL_LEQUAL))
+        glEnable(GLenum(GL_CULL_FACE))
+        glFrontFace(GLenum(GL_CCW))
+        glCullFace(GLenum(GL_BACK))
+
+        scene = Scene()
     }
 
+    var width: GLfloat = 0.0, x0: GLfloat = 0.0
+
     func onSurfaceChanged(width: Int, height: Int) {
-	    self.width = GLfloat(width)
-	    self.height = GLfloat(height)
+        self.width = GLfloat(width)
+
+        // Update the viewport.
+        glViewport(0, 0, GLsizei(width), GLsizei(height))
+
+        // Create projection matrix.
+        let aspectRatio = Float(width) / Float(height)
+        projectionMatrix = Matrix4.perspectiveMatrix(fov: Float.pi / 4.0, aspect: aspectRatio, near: 0.1, far: 200.0)
     }
 
     func onDrawFrame() {
-        var vbo: GLuint = 0;
-	    glClearColor(1.0, g, b, 0.0)
-	    glClear(UInt32(GL_COLOR_BUFFER_BIT))
+        glClear(GLbitfield(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT))
+        scene.render(projectionMatrix)
+        glFlush()
+
+        // Cycle the scene.
+        scene.cycle(1.0/20.0)
     }
 
     func drawPoint(x: Int, y: Int) {
-        g = GLfloat(x)/width
-        b = GLfloat(y)/height
+        let dx = GLfloat(x)/width - x0
+        scene.cycle(dx * 5.0)
+        x0 = GLfloat(x)/width
     }
 
 }

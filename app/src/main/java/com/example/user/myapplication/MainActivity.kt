@@ -54,6 +54,12 @@ class MainActivity : AppCompatActivity(), Responder {
             val pemfile = cacheDir + "/cacert.pem"
             val pemStream = SwiftApp.sharedApplication.getResources()?.openRawResource(R.raw.cacert)
             copyResource(pemStream, pemfile)
+            val shader1 = SwiftApp.sharedApplication.getResources()?.openRawResource(R.raw.shader1)
+            copyResource(shader1, cacheDir + "/shader.fs")
+            val shader2 = SwiftApp.sharedApplication.getResources()?.openRawResource(R.raw.shader2)
+            copyResource(shader2, cacheDir + "/shader.vs")
+            val normalmap = SwiftApp.sharedApplication.getResources()?.openRawResource(R.raw.normalmap)
+            copyResource(normalmap, cacheDir + "/normalmap.png")
             listener.setCacheDir(cacheDir)
 
 //            basicTests(10)
