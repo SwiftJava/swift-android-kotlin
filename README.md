@@ -2,7 +2,7 @@
 
 ![](http://johnholdsworth.com/swiftjava.png?v=1)
 
-An example application for mixing Swift, OpenGL and Kotlin in an Android application. This allows you to reuse model layer code from your iOS application when porting to Android. The "binding" between the Kotlin or Java code and Swift is completely type safe with all JNI code  automatically generated using a script. Building the Swift code is performed using the Swift Package manager and a small gradle plugin. This branch uses scarcely mofified code from Josh A Beam's [CocoaOpenGL-Swift](https://github.com/joshb/CocoaOpenGL-Swift) to demonstrate using OpenGL from Swift in an Android application.
+An example application for mixing Swift, OpenGL and Kotlin in an Android application. This allows you to reuse model layer code from your iOS application when porting to Android. The "binding" between the Kotlin or Java code and Swift is completely type safe with all JNI code  automatically generated using a script. Building the Swift code is performed using the Swift Package manager and a small gradle plugin. This branch uses scarcely modified code from Josh A Beam's [CocoaOpenGL-Swift](https://github.com/joshb/CocoaOpenGL-Swift) to demonstrate using OpenGL from Swift in an Android application.
 
 CocoaOpenGL-Swift
 =================
